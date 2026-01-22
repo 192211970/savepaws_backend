@@ -36,31 +36,8 @@ if ($update->affected_rows === 0) {
     exit;
 }
 
-/* =================================================
-   🔔 SEND NOTIFICATION TO USER
-   ================================================= */
-include_once 'send_notification.php';
 
-// Get User ID and Token
-$uQuery = $conn->prepare("
-    SELECT u.fcm_token 
-    FROM cases c 
-    JOIN users u ON c.user_id = u.id 
-    WHERE c.case_id = ?
-");
-$uQuery->bind_param("i", $case_id);
-$uQuery->execute();
-$uResult = $uQuery->get_result();
 
-if ($uRow = $uResult->fetch_assoc()) {
-    if (!empty($uRow['fcm_token'])) {
-        sendNotification(
-            $uRow['fcm_token'],
-            "Rescuer Reached!",
-            "The rescue team has reached the location."
-        );
-    }
-}
 
 echo json_encode([
     "status" => "success",

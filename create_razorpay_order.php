@@ -30,10 +30,10 @@ if (!$donation_id || !$user_id) {
    ========================= */
 $query = $conn->prepare("
     SELECT d.donation_id, d.amount, d.approval_status, d.donation_status,
-           c.case_id, rc.center_name
+           c.case_id, ct.center_name
     FROM donations d
     JOIN cases c ON d.case_id = c.case_id
-    JOIN rescue_centers rc ON d.center_id = rc.center_id
+    JOIN centers ct ON d.center_id = ct.center_id
     WHERE d.donation_id = ? AND d.approval_status = 'Approved'
 ");
 

@@ -88,43 +88,8 @@ try {
     // ---------- COMMIT ----------
     $conn->commit();
 
-    /* =================================================
-       🔔 SEND NOTIFICATION TO USER
-       ================================================= */
-    include_once 'send_notification.php';
 
-    // Get User ID and Token
-    $uQuery = $conn->prepare("
-        SELECT u.fcm_token 
-        FROM cases c 
-        JOIN users u ON c.user_id = u.id 
-        WHERE c.case_id = ?
-    ");
-    $uQuery->bind_param("i", $case_id);
-    $uQuery->execute();
-    $uResult = $uQuery->get_result();
 
-    if ($uRow = $uResult->fetch_assoc()) {
-        if (!empty($uRow['fcm_token'])) {
-            sendNotification(
-                $uRow['fcm_token'],
-                "Animal Rescued!",
-                "Great news! The animal has been rescued successfully and the case is closed."
-            );
-        }
-    }
-
-    /* 🔔 NOTIFY ADMIN (CASE CLOSED) */
-    $adminQ = $conn->query("SELECT fcm_token FROM users WHERE user_type = 'Admin' LIMIT 1");
-    if ($adminRow = $adminQ->fetch_assoc()) {
-        if (!empty($adminRow['fcm_token'])) {
-            sendNotification(
-                $adminRow['fcm_token'],
-                "Case Closed",
-                "Case #$case_id has been successfully closed and animal rescued."
-            );
-        }
-    }
 
     echo json_encode([
         "status" => "success",

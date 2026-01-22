@@ -127,70 +127,9 @@ try {
             $incCenter->bind_param("i", $center_id);
             $incCenter->execute();
 
-            /* =================================================
-               🔔 SEND NOTIFICATION TO USER
-               ================================================= */
-            include_once 'send_notification.php';
-            
-            // Get User ID and Token
-            $uQuery = $conn->prepare("
-                SELECT u.fcm_token 
-                FROM cases c 
-                JOIN users u ON c.user_id = u.id 
-                WHERE c.case_id = ?
-            ");
-            $uQuery->bind_param("i", $case_id);
-            $uQuery->execute();
-            $uResult = $uQuery->get_result();
-            
-            if ($uRow = $uResult->fetch_assoc()) {
-                if (!empty($uRow['fcm_token'])) {
-                    sendNotification(
-                        $uRow['fcm_token'],
-                        "Case Accepted!",
-                        "Your case has been accepted by a rescue center."
-                    );
-                }
-            }
 
-            /* =================================================
-               🔔 SEND NOTIFICATION TO ADMIN
-               ================================================= */
-            $adminQ = $conn->query("SELECT fcm_token FROM users WHERE user_type = 'Admin' LIMIT 1");
-            if ($adminRow = $adminQ->fetch_assoc()) {
-                if (!empty($adminRow['fcm_token'])) {
-                    sendNotification(
-                        $adminRow['fcm_token'],
-                        "Case Accepted",
-                        "Case #$case_id has been accepted by Center #$center_id"
-                    );
-                }
-            }
 
-            /* =================================================
-               🔔 BROADCAST TO OTHER CENTERS (CASE TAKEN)
-               ================================================= */
-            // Notify other centers that received this case request but didn't accept it
-            $othersQ = $conn->prepare("
-                SELECT u.fcm_token 
-                FROM case_escalations ce
-                JOIN centers c ON ce.center_id = c.center_id
-                LEFT JOIN users u ON c.email = u.email
-                WHERE ce.case_id = ? AND ce.center_id != ?
-            ");
-            $othersQ->bind_param("ii", $case_id, $center_id);
-            $othersQ->execute();
-            $othersRes = $othersQ->get_result();
-            
-            while ($oRow = $othersRes->fetch_assoc()) {
-                if (!empty($oRow['fcm_token'])) {
-                    sendNotification(
-                        $oRow['fcm_token'],
-                        "Case Update",
-                        "Case #$case_id has been accepted by another center."
-                    );
-                }
-            }
+
 
         }
 

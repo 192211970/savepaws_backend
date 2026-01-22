@@ -37,17 +37,17 @@ try {
             d.payment_method,
             d.transaction_id,
             d.payment_time,
-            rc.center_name,
-            rc.phone AS center_phone,
-            rc.address AS center_address,
-            rc.email AS center_email,
-            c.type_of_animal,
-            c.animal_condition,
-            c.photo AS case_photo,
-            c.status AS case_status
+            c.center_name,
+            c.phone AS center_phone,
+            c.address AS center_address,
+            c.email AS center_email,
+            cs.type_of_animal,
+            cs.animal_condition,
+            cs.photo AS case_photo,
+            cs.status AS case_status
         FROM donations d
-        LEFT JOIN rescue_centers rc ON d.center_id = rc.center_id
-        LEFT JOIN cases c ON d.case_id = c.case_id
+        LEFT JOIN centers c ON d.center_id = c.center_id
+        LEFT JOIN cases cs ON d.case_id = cs.case_id
         WHERE d.donation_id = ?
     ";
     

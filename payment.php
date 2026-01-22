@@ -79,36 +79,8 @@ if (!$update->execute()) {
     exit;
 }
 
-/* =================================================
-   🔔 NOTIFICATIONS (Center: Paid, User: Thank You)
-   ================================================= */
-include_once 'send_notification.php';
 
-// 1. Notify Center
-$cQ = $conn->prepare("
-    SELECT u.fcm_token, d.amount 
-    FROM donations d 
-    JOIN centers c ON d.center_id = c.center_id 
-    LEFT JOIN users u ON c.email = u.email 
-    WHERE d.donation_id = ?
-");
-$cQ->bind_param("i", $donation_id);
-$cQ->execute();
-if ($cRow = $cQ->get_result()->fetch_assoc()) {
-    if (!empty($cRow['fcm_token'])) {
-        sendNotification($cRow['fcm_token'], "Donation Received!", "You received ₹" . $cRow['amount'] . " for Donation #$donation_id");
-    }
-}
 
-// 2. Notify User (Donor)
-$uQ = $conn->prepare("SELECT fcm_token FROM users WHERE id = ?");
-$uQ->bind_param("i", $user_id);
-$uQ->execute();
-if ($uRow = $uQ->get_result()->fetch_assoc()) {
-    if (!empty($uRow['fcm_token'])) {
-        sendNotification($uRow['fcm_token'], "Payment Successful", "Thank you! Your donation was successful.");
-    }
-}
 
 /* =========================
    SUCCESS RESPONSE

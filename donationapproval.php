@@ -71,24 +71,7 @@ if ($action === 'approve') {
     $update->bind_param("i", $donation_id);
     $update->execute();
 
-    /* 🔔 NOTIFY CENTER (APPROVED) */
-    include_once 'send_notification.php';
-    // Get Center Token via Donation -> Center -> User (via email) or directly if linked
-    // Assuming centers table has email same as users
-    $cQ = $conn->prepare("
-        SELECT u.fcm_token 
-        FROM donations d 
-        JOIN centers c ON d.center_id = c.center_id 
-        LEFT JOIN users u ON c.email = u.email 
-        WHERE d.donation_id = ?
-    ");
-    $cQ->bind_param("i", $donation_id);
-    $cQ->execute();
-    if ($cRow = $cQ->get_result()->fetch_assoc()) {
-        if (!empty($cRow['fcm_token'])) {
-            sendNotification($cRow['fcm_token'], "Donation Approved", "Your donation request #$donation_id has been approved.");
-        }
-    }
+
 
     echo json_encode([
         "status" => "success",
@@ -108,22 +91,7 @@ if ($action === 'reject') {
     $update->bind_param("i", $donation_id);
     $update->execute();
 
-    /* 🔔 NOTIFY CENTER (REJECTED) */
-    include_once 'send_notification.php';
-    $cQ = $conn->prepare("
-        SELECT u.fcm_token 
-        FROM donations d 
-        JOIN centers c ON d.center_id = c.center_id 
-        LEFT JOIN users u ON c.email = u.email 
-        WHERE d.donation_id = ?
-    ");
-    $cQ->bind_param("i", $donation_id);
-    $cQ->execute();
-    if ($cRow = $cQ->get_result()->fetch_assoc()) {
-        if (!empty($cRow['fcm_token'])) {
-            sendNotification($cRow['fcm_token'], "Donation Rejected", "Your donation request #$donation_id was rejected.");
-        }
-    }
+
 
     echo json_encode([
         "status" => "success",

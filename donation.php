@@ -105,20 +105,8 @@ if (!$stmt->execute()) {
     exit;
 }
 
-/* =========================
-   🔔 NOTIFY ADMIN
-   ========================= */
-include_once 'send_notification.php';
-$adminQ = $conn->query("SELECT fcm_token FROM users WHERE user_type = 'Admin' LIMIT 1");
-if ($adminRow = $adminQ->fetch_assoc()) {
-    if (!empty($adminRow['fcm_token'])) {
-        sendNotification(
-            $adminRow['fcm_token'],
-            "New Donation Request",
-            "Center #$center_id has requested ₹$amount for Case #$case_id"
-        );
-    }
-}
+
+
 
 /* =========================
    SUCCESS RESPONSE
